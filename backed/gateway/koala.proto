@@ -1,0 +1,619 @@
+//  goctl rpc protoc koala.proto --go_out=. --go-grpc_out=. --zrpc_out=. -m=true --style=goZero
+// 生成http： protoc --include_imports --proto_path=. --descriptor_set_out=koala.pb koala.proto
+syntax = "proto3";
+option go_package = "./pb";
+package koala;
+
+import "google/api/annotations.proto";
+
+service Authority {
+  //检查权限
+  rpc Enforce(PolicyReq) returns(BoolRep);
+  //批量检查权限
+  rpc BatchEnforce(RulesReq) returns(BoolRep) {
+    option (google.api.http) = {
+      post: "/v1/BatchEnforce"
+      body: "*"
+    };
+  }
+  //用户权限验证
+  rpc UserPermsVerify(UserPermsVerifyReq) returns(BoolRep) {
+    option (google.api.http) = {
+      post: "/v1/UserPermsVerify"
+      body: "*"
+    };
+  };
+  // 绑定校色
+  rpc RoleBind(RoleBindReq) returns(BoolRep) {
+    option (google.api.http) = {
+      post: "/v1/RoleBind"
+      body: "*"
+    };
+  };
+}
+
+service Account {
+  rpc CreateAccount(AccountReq) returns(EmptyResp) {
+    option (google.api.http) = {
+      post: "/v1/CreateAccount"
+      body: "*"
+    };
+  };
+  rpc UpdateAccount(AccountReq) returns(EmptyResp) {
+    option (google.api.http) = {
+      post: "/v1/UpdateAccount"
+      body: "*"
+    };
+  };
+  rpc DeleteAccounts(DeletesReq) returns(EmptyResp) {
+    option (google.api.http) = {
+      post: "/v1/DeleteAccounts"
+      body: "*"
+    };
+  };
+  rpc PageAccount(AccountQueryReq) returns(AccountListResp) {
+    option (google.api.http) = {
+      post: "/v1/PageAccount"
+      body: "*"
+    };
+  };
+  rpc UpdatePassword(UpdatePasswordReq) returns(EmptyResp) {
+    option (google.api.http) = {
+      post: "/v1/UpdatePassword"
+      body: "*"
+    };
+  };
+  rpc ResetPassword(ResetPasswordReq) returns(EmptyResp) {
+    option (google.api.http) = {
+      post: "/p/v1/ResetPassword"
+      body: "*"
+    };
+  };
+
+  rpc RegisterUser(RegisterReq) returns(RegisterResp) {
+    option (google.api.http) = {
+      post: "/v1/RegisterUser"
+      body: "*"
+    };
+  };
+  rpc LoginUser(LoginReq) returns(LoginResp) {
+    option (google.api.http) = {
+      post: "/p/v1/LoginUser"
+      body: "*"
+    };
+  };
+  rpc getUserInfo(GetUserInfoReq) returns(GetUserInfoResp) {
+    option (google.api.http) = {
+      post: "/v1/getUserInfo"
+      body: "*"
+    };
+  };
+  rpc generateToken(GenerateTokenReq) returns(GenerateTokenResp) {
+    option (google.api.http) = {
+      get: "/p/v1/generateToken/{userId}"
+    };
+  };
+}
+
+service Application {
+  rpc CreateSysApplication(CreateSysApplicationReq) returns (CreateSysApplicationResp) {
+    option (google.api.http) = {
+      post: "/v1/CreateSysApplication"
+      body: "*"
+    };
+  };
+  rpc UpdateSysApplication(UpdateSysApplicationReq) returns (UpdateSysApplicationResp) {
+    option (google.api.http) = {
+      post: "/v1/UpdateSysApplication"
+      body: "*"
+    };
+  };
+  rpc DeleteSysApplication(DeleteSysApplicationReq) returns (DeleteSysApplicationResp) {
+    option (google.api.http) = {
+      delete: "/v1/DeleteSysApplication/{id}"
+    };
+  };
+  rpc DetailSysApplication(DetailSysApplicationReq) returns (DetailSysApplicationResp) {
+    option (google.api.http) = {
+      get: "/v1/DetailSysApplication/{id}"
+    };
+  };
+  rpc PageSysApplication(SearchSysApplicationReq) returns (SearchSysApplicationResp) {
+    option (google.api.http) = {
+      post: "/v1/PageSysApplication"
+      body: "*"
+    };
+  };
+}
+
+service Menu {
+  rpc CreateMenu(MenuReq) returns(EmptyResp);
+  rpc UpdateMenu(MenuReq) returns(EmptyResp);
+  rpc DeleteMenus(DeletesReq) returns(EmptyResp);
+  rpc GetMenuTree(MenuQueryReq) returns(MenusResp);
+  rpc GetUserMenuList(UserReq) returns(UserMenusResp);
+  rpc GetMenuForRole(PermsReq) returns(PermsResp); // 获取角色拥有的菜单id
+}
+
+service Role {
+  rpc CreateRole(RoleReq) returns(EmptyResp);
+  rpc UpdateRole(RoleReq) returns(EmptyResp);
+  rpc DeleteRole(DeletesReq) returns(EmptyResp);
+  rpc PageRole(RoleQueryReq) returns(RoleListResp);
+}
+
+service Dept {
+  rpc CreateDept(DeptReq) returns(EmptyResp);
+  rpc UpdateDept(DeptReq) returns(EmptyResp);
+  rpc DeleteDept(DeletesReq) returns(EmptyResp);
+  rpc PageDept(DeptQueryReq) returns(DeptListResp);
+}
+
+service Post {
+  rpc CreatePost(PostReq) returns(EmptyResp);
+  rpc UpdatePost(PostReq) returns(EmptyResp);
+  rpc DeletePost(DeletesReq) returns(EmptyResp);
+  rpc PagePost(PostQueryReq) returns(PostListResp);
+}
+
+service Api {
+  rpc CreateApi(ApiReq) returns(EmptyResp);
+  rpc UpdateApi(ApiReq) returns(EmptyResp);
+  rpc DeleteApi(DeletesReq) returns(EmptyResp);
+  rpc PageApi(ApiQueryReq) returns(ApiListResp);
+}
+
+
+message EmptyReq {
+}
+message EmptyResp {
+}
+
+message DeletesReq {
+  repeated int64 ids = 1;
+}
+message UserReq {
+  int64 userId = 1;
+  string dom = 2;
+}
+message IdReq {
+  int64 id = 1;
+  string dom = 2;
+}
+message IdsResp {
+  repeated int64 ids = 1;
+}
+message PermsReq {
+  string perms = 1;
+}
+message PermsResp {
+  repeated string permsList = 1;
+}
+//-----------------------sys_application-----------------------
+message SysApplicationView {
+  int64 id = 1; //
+  string name = 2; //应用名字
+  string des = 3; //应用描述
+  string perms = 4; //权限标识
+  int64 organizationId = 5; //组织id
+  string status = 6; //
+  int64 createTime = 7; //
+  int64 updateTime = 8; //
+  int64 deleteFlag = 9; //
+  int64 createBy = 10; //
+  string coverUrl = 11; //封面
+  string href = 12; //连接地址
+  string loginCallbackUrl = 13; //登录回调地址
+  string appId = 14; //appId应用标识
+}
+
+message CreateSysApplicationReq {
+  string name = 2; //应用名字
+  string des = 3; //应用描述
+  int64 organizationId = 5; //组织id
+  string status = 6;
+  string coverUrl = 11; //封面
+  string href = 12; //连接地址
+  string loginCallbackUrl = 13; //登录回调地址
+}
+
+message CreateSysApplicationResp {
+  string appId = 1;
+  string perms = 2;
+}
+
+message UpdateSysApplicationReq {
+  int64 id = 1; //
+  string name = 2; //应用名字
+  string des = 3; //应用描述
+  string status = 6; //
+  string coverUrl = 11; //封面
+  string href = 12; //连接地址
+  string loginCallbackUrl = 13; //登录回调地址
+}
+
+message UpdateSysApplicationResp {
+}
+
+message DeleteSysApplicationReq {
+  int64 id = 1; //
+}
+
+message DeleteSysApplicationResp {
+}
+
+message DetailSysApplicationReq {
+  int64 id = 1; //
+}
+
+message DetailSysApplicationResp {
+  int64 id = 1; //
+  string name = 2; //应用名字
+  string des = 3; //应用描述
+  string perms = 4; //权限标识
+  int64 organizationId = 5; //组织id
+  string status = 6; //
+  string createTime = 7; //
+  string updateTime = 8; //
+  int64 createBy = 10; //
+  string coverUrl = 11; //封面
+  string href = 12; //连接地址
+  string loginCallbackUrl = 13; //登录回调地址
+  string appId = 14; //appId应用标识
+}
+
+message SearchSysApplicationReq {
+  int64 pageSize = 3; // 每页条数
+  int64 pageCurrent = 4;  // 当前页
+  repeated string orderSort = 5;  // 排序 eg： ["create_time asc", "id desc"]
+  string searchPlus = 6; // 加强版搜索参数
+  int64 id = 8; //
+  string name = 9; //应用名字
+  string des = 10; //应用描述
+  string perms = 11; //权限标识
+  int64 organizationId = 12; //组织id
+  string status = 13; //
+  int64 createBy = 17; //
+  string coverUrl = 18; //封面
+  string href = 19; //连接地址
+  string loginCallbackUrl = 20; //登录回调地址
+  string appId = 21; //appId应用标识
+}
+
+message SearchSysApplicationResp {
+  int64 total = 1;
+  int64 pageCurrent = 2;
+  int64 pageSize = 3;
+  int64 pageTotal = 4;
+  repeated SysApplicationView list = 7; // 列表
+}
+
+message DeptReq {
+  int64   Id = 1;                // 部门id
+  int64    ParentId = 2;                // 父部门id
+  string  Ancestors = 3;                          // 祖级列表
+  string   DeptName = 4;                         // 部门名称
+  int64     OrderNum = 5;                         // 显示顺序
+  string   Leader = 6;                             // 负责人
+  string    Phone = 7;                             // 联系电话
+  string    Email = 8;                              // 邮箱
+  string    Status = 9;                            // 部门状态（0正常 1停用）
+  repeated DeptReq Children = 10;                  // 备注
+  string    perms = 11;
+  int64 appId = 12;
+}
+message DeptQueryReq {
+  int64 pageSize = 3; // 每页条数
+  int64 pageCurrent = 4;  // 当前页
+  repeated string orderSort = 5;  // 排序 eg： ["create_time asc", "id desc"]
+  string searchPlus = 6; // 加强版搜索参数
+  bool openTree = 7;
+  int64 appId = 8;
+}
+message DeptListResp {
+  repeated DeptReq list = 1;
+  int64 total = 20;
+  int64 pageCurrent = 21;
+  int64 pageSize = 22;
+  int64 pageTotal = 23;
+}
+
+message PostReq {
+  int64      Id = 1;                                // 岗位ID
+  string    PostCode = 2;                       // 岗位编码
+  string   PostName = 3;                        // 岗位名称
+  int64    PostSort = 4;                         // 显示顺序
+  string   Status = 5;                           // 状态（0正常 1停用）
+  string    Remark = 6;                            // 备注
+}
+message PostQueryReq {
+  int64 pageSize = 3; // 每页条数
+  int64 pageCurrent = 4;  // 当前页
+  repeated string orderSort = 5;  // 排序 eg： ["create_time asc", "id desc"]
+  string searchPlus = 6; // 加强版搜索参数
+  int64 appId = 8;
+}
+message PostListResp {
+  repeated RoleReq list = 1;
+  int64 total = 20;
+  int64 pageCurrent = 21;
+  int64 pageSize = 22;
+  int64 pageTotal = 23;
+}
+
+message RoleReq {
+  int64     id = 1;               // 角色ID
+  int64     parentId = 2;                // 父角色
+  string     roleName = 3;                       // 角色名称
+  string   perms = 4;                          // 角色权限字符串
+  int64     roleSort = 5;                         // 显示顺序
+  string   dataScope = 6;                    // 数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限）
+  string  status = 7;                             // 角色状态（0正常 1停用）
+  string    remark = 8;// 备注
+  repeated RoleReq children = 9;
+  repeated string menuPerms = 15; // 分配的菜单权限
+  int64 appId = 10;
+}
+message RoleQueryReq {
+  int64 pageSize = 3; // 每页条数
+  int64 pageCurrent = 4;  // 当前页
+  repeated string orderSort = 5;  // 排序 eg： ["create_time asc", "id desc"]
+  string searchPlus = 6; // 加强版搜索参数
+  bool openTree = 7;
+  int64 appId = 8;
+}
+message RoleListResp {
+  repeated RoleReq list = 1;
+  int64 total = 20;
+  int64 pageCurrent = 21;
+  int64 pageSize = 22;
+  int64 pageTotal = 23;
+}
+
+
+message ApiReq {
+  int64    id = 1;                // 菜单ID
+  string     des = 2;                               // 描述
+  string   path = 3;                            // 路径
+  string     group = 4;                            // 分组
+  string     status = 5;                            // 菜单状态（0正常 1停用）
+  string     method = 6;
+  string     perms = 7;
+  string    createBy = 19;                         // 创建者
+  string     updateBy = 16;                        // 更新者
+  string     remark = 17;                           // 备注
+  int64 appId = 8;
+}
+message ApiQueryReq {
+  int64 pageSize = 3; // 每页条数
+  int64 pageCurrent = 4;  // 当前页
+  repeated string orderSort = 5;  // 排序 eg： ["create_time asc", "id desc"]
+  string searchPlus = 6; // 加强版搜索参数
+  int64 appId = 8;
+}
+message ApiListResp {
+  repeated ApiReq list = 1;
+  int64 total = 20;
+  int64 pageCurrent = 21;
+  int64 pageSize = 22;
+  int64 pageTotal = 23;
+}
+
+message MenuQueryReq {
+  int64 pageSize = 3; // 每页条数
+  int64 pageCurrent = 4;  // 当前页
+  repeated string orderSort = 5;  // 排序 eg： ["create_time asc", "id desc"]
+  string searchPlus = 6; // 加强版搜索参数
+  int64 appId = 8;
+}
+message MenuReq {
+  int64 id = 1;
+  string    menuName = 2;                       // 菜单名称
+  int64     parentId = 3;                         // 父菜单ID
+  int64      orderNo = 4;                        // 显示顺序
+  string     path = 5;                             // 路由地址
+  string    component = 6;                        // 组件路径
+  string    Redirect = 18;                        // 重定向
+  string    query = 7;                           // 路由参数
+  int64      IsFrame = 8;                         // 是否为外链（0是 1否）
+  int64    IsCache = 9;                          // 是否缓存（0缓存 1不缓存）
+  string   menuType = 10;                        // 菜单类型（M目录 C菜单 F按钮）
+  string    visible = 11;                          // 菜单状态（0显示 1隐藏）
+  string     status = 12;                        // 菜单状态（0正常 1停用）
+  string    perms = 13;                            // 权限标识
+  string     icon = 14;                            // 菜单图标
+  string    createBy = 19;                         // 创建者
+  string     updateBy = 16;                        // 更新者
+  string     remark = 17;                           // 备注
+  string     currentActiveMenu = 20;
+  repeated MenuReq children = 15; //子菜单
+  int64 appId = 21;
+}
+message MenusResp {
+  repeated MenuReq menus = 1;
+}
+message UserMenusResp {
+  repeated MenusListResp menus = 1;
+}
+message MenusListResp {
+  int64 Id = 1;                                 // 菜单ID
+  string Name = 2;                                     // 菜单名称
+  int64 ParentId = 3;                             // 父菜单ID
+  string Path = 4;                                             // 路由地址
+  string Component = 5;                                   // 组件路径
+  string Redirect = 6;                                   // 重定向
+  string Perms = 7;                                           // 权限标识
+  MenuMeta Meta = 8;
+  message MenuMeta {
+    string Title = 1;
+    string CurrentActiveMenu = 2;
+    bool HideMenu = 3;
+    string Icon = 4;
+    int64 OrderNo = 5;
+    bool IgnoreKeepAlive = 6;
+    string  FrameSrc = 7;
+    bool IgnoreRoute = 8;
+  }
+  repeated MenusListResp Children = 9;                                 // 子菜单
+}
+
+message User {
+  int64 id = 1;
+  string userName = 2;                                        // 用户账号
+  string nickName = 3;                               // 用户昵称
+  string userType = 4;                                         // 用户类型（00系统用户）
+  string email = 5;                                   // 用户邮箱
+  string phone = 6;                                 // 手机号码
+  string sex = 7;                                         // 用户性别（0男 1女 2未知）
+  string avatar = 8;                           // 头像地址
+  string status = 10;                                       // 帐号状态（0正常 1停用）
+  string remark = 11;                            // 备注
+}
+message AccountReq {
+  int64 id = 1; // 用户id
+  string userName = 2;                                        // 用户账号
+  string nickName = 3;                               // 用户昵称
+  string userType = 4;                                         // 用户类型（00系统用户）
+  string email = 5;                                   // 用户邮箱
+  string phone = 6;                                 // 手机号码
+  string sex = 7;                                         // 用户性别（0男 1女 2未知）
+  string avatar = 8;                           // 头像地址
+  string status = 10;                                       // 帐号状态（0正常 1停用）
+  string remark = 11;                            // 备注
+  string password = 16; //密码
+  string createTime = 17; //创建时间
+}
+message AccountQueryReq {
+  int64 pageSize = 3; // 每页条数
+  int64 pageCurrent = 4;  // 当前页
+  repeated string orderSort = 5;  // 排序 eg： ["create_time asc", "id desc"]
+  string searchPlus = 6; // 加强版搜索参数
+  repeated int64 DeptIds = 7;
+}
+message AccountListResp {
+  repeated GetUserInfoResp list = 1;
+  int64 total = 20;
+  int64 pageCurrent = 21;
+  int64 pageSize = 22;
+  int64 pageTotal = 23;
+}
+message UpdatePasswordReq {
+  int64 userId = 3;
+  string passwordOld = 1;
+  string passwordNew = 2;
+}
+message ResetPasswordReq {
+  int64 userId = 1;
+  string password = 2;
+}
+
+message RegisterReq {
+  string userName = 2;                                        // 用户账号
+  string nickName = 3;                               // 用户昵称
+  string userType = 4;                                         // 用户类型（00系统用户）
+  string email = 5;                                   // 用户邮箱
+  string phone = 6;                                 // 手机号码
+  string sex = 7;                                         // 用户性别（0男 1女 2未知）
+  string avatar = 8;                           // 头像地址
+  string password = 9;                                         // 密码
+  int64 status = 10;                                       // 帐号状态（0正常 1停用）
+  string remark = 11;                            // 备注
+  int64 deptId = 12;
+}
+message RegisterResp {
+  string accessToken = 1;
+  int64  accessExpire = 2;
+  int64  refreshAfter = 3;
+  int64 id = 4;
+}
+message LoginReq {
+  string  authType = 1;
+  string authKey = 2;
+  string  password = 3;
+}
+message LoginResp {
+  string accessToken = 1;
+  int64  accessExpire = 2;
+  int64  refreshAfter = 3;
+}
+message GetUserInfoReq {
+  int64  userId = 1;
+  string appId = 2;
+  bool role = 3;
+  bool dept = 4;
+  bool post = 5;
+}
+message GetUserInfoResp {
+  AccountReq user = 1;
+  string appId = 2;
+  repeated DeptReq dept = 3;
+  repeated PostReq post = 4;
+  repeated RolePermission role = 5;
+}
+message GenerateTokenReq {
+  int64 userId = 1;
+}
+message GenerateTokenResp {
+  string accessToken = 1;
+  int64  accessExpire = 2;
+  int64  refreshAfter = 3;
+}
+
+message UserPermsVerifyReq {
+  string dom = 2;
+  string user = 3;
+  string obj = 4;
+  string act = 5;
+  repeated UserPermsVerifyReq batch = 6;
+}
+
+message RoleBindReq {
+  string action = 1;
+  string dom = 2;
+  string role = 3;
+  string obj = 4;
+  string act = 5;
+  repeated RoleBindReq batch = 6;
+}
+
+message RolePermission {
+    string rolePerms = 1;
+    string roleName = 2;
+    string roleDes = 3;
+    string roleGroup = 4;
+    string createTime = 5;
+    string appPerms = 6;
+    repeated Permission permissions = 7;
+}
+message Permission {
+  string perms = 1;
+  string appPerms = 2;
+  string name = 3;
+  string des = 4;
+  string group = 5;
+  string createTime = 6;
+  string roleName = 7;
+  string rolePerms = 8;
+}
+
+message QueryReq {
+  int64 id = 1;
+  int64 domId = 2;
+}
+
+message PolicyReq {
+  string Ptype = 1; // p g g2
+  int32 Index = 2;
+  repeated string Rule = 3;
+}
+message RuleResp {
+  repeated string Rule = 1;
+}
+message RulesReq {
+  repeated PolicyReq Rules = 1;
+}
+
+message BoolRep {
+  bool res = 1;
+}
+

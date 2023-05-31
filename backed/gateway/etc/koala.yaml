@@ -1,0 +1,25 @@
+Mode: dev
+Name: koala.gateway
+ListenOn: 0.0.0.0:9001
+Timeout: 600000
+Gateway:
+  Name: gateway
+  Port: 9002
+  Timeout: 600000
+  Upstreams:
+    - Name: gateway-server
+      Grpc:
+        Endpoints:
+          - localhost:9001
+        RpcClientConf:
+          Timeout: 600000
+      ProtoSets:
+        - gateway/koala.pb
+
+DB:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/maolinc?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+
+#jwtAuth
+JwtAuth:
+  AccessSecret: 123456789maolinc
+  AccessExpire: 31536000
